@@ -38,7 +38,8 @@ define([
 	'ui/scopes',
 	'util/class',
 	'PubSub',
-	'block/block-utils'
+	'block/block-utils',
+	'util/html'
 ], function(
 	Aloha,
 	jQuery,
@@ -47,7 +48,8 @@ define([
 	Scopes,
 	Class,
 	PubSub,
-	BlockUtils
+	BlockUtils,
+    Html
 ){
 	'use strict';
 
@@ -182,8 +184,52 @@ define([
 			//	}
 			//});
 
+			// Creates functions
+
+			this._createPadUnpadFns();
+			// Only for the inline blocks.
+			// It is not possible to insert text after or before a Block span
+			// when after or before the Block there is not elements
+			if (Html.isInlineFormattable(this.$element[0])) {
+				Aloha.bind('aloha-editable-activated', this._padInLineBlock);
+				Aloha.bind('aloha-editable-deactivated', this._unpadInLineBlock);
+			}
+
 			this._initialized = true;
 		},
+
+		_padInLineBlock: undefined,
+		_unpadInLineBlock: undefined,
+
+		/**
+		 * Crear pad and unpad functions with this block as
+		 * parameter.
+		 *
+		 * @private
+		 */
+		_createPadUnpadFns: function () {
+			this._padInLineBlock = (function (thisBlock) {
+				return function ($event, data) {
+					if (data.editable) {
+						var $block = data.editable.obj.find('#' + thisBlock.id);
+						if ($block.length !== 0) {
+							BlockUtils.pad(thisBlock.$element);
+						}
+					}
+				}
+			})();
+
+			this._unpadInLineBlock = (function (thisBlock) {
+				return function ($event, data) {
+					if (data.editable) {
+						var $block = data.editable.obj.find('#' + thisBlock.id);
+						if ($block.length !== 0) {
+							BlockUtils.unpad(thisBlock.$element);
+						}
+					}
+				}
+			})();
+	},
 
 		/**
 		 * Is set inside the constructor to the event handler function
@@ -262,6 +308,9 @@ define([
 				this.$element.unbind('mousedown', this._preventSelectionChangedEventHandler);
 				this.$element.unbind('focus', this._preventSelectionChangedEventHandler);
 				this.$element.unbind('dblclick', this._preventSelectionChangedEventHandler);
+
+				Aloha.unbind('aloha-editable-activated', this._padInLineBlock);
+				Aloha.unbind('aloha-editable-deactivated', this._unpadInLineBlock);
 			}
 		},
 

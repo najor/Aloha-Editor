@@ -127,28 +127,6 @@ define([
 			Aloha.bind('aloha-editable-activated', function (e, params) {
 				that.applyButtonConfig(params.editable);
 			});
-
-
-			Aloha.bind('aloha-editable-activated', function ($event, data) {
-				if (data.editable) {
-					data.editable.obj.find('.aloha-block').each(function () {
-						if (HtmlUtils.isSpan(this)) {
-							BlockUtils.addWhiteSpacesAfterAndBefore(jQuery(this));
-						}
-					});
-				}
-			});
-
-			Aloha.bind('aloha-editable-deactivated', function ($event, data) {
-				if (data.editable) {
-					data.editable.obj.find('.aloha-block').each(function () {
-						if (HtmlUtils.isSpan(this)) {
-							BlockUtils.removeWhiteSpacesAfterAndBefore(jQuery(this));
-						}
-					});
-				}
-			});
-
 		},
 
 		/**

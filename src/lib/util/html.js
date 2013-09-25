@@ -85,6 +85,30 @@ define([
 		'video'      // HTML5
 	];
 
+	/**
+	 * Void elements are elements which are not permitted to contain content.
+	 * https://developer.mozilla.org/en-US/docs/Web/HTML/Element
+	 *
+	 * @type {Object}
+	 */
+	var VOID_ELEMENTS = [
+		'area',
+		'base',
+		'br',
+		'col',
+		'command',
+		'embed',
+		'hr',
+		'img',
+		'input',
+		'keygen',
+		'link',
+		'meta',
+		'param',
+		'source',
+		'track',
+		'wbr'
+	];
 
 	/**
 	 * Unicode zero width space characters:
@@ -299,6 +323,7 @@ define([
 
 	return {
 		BLOCKLEVEL_ELEMENTS: BLOCKLEVEL_ELEMENTS,
+		VOID_ELEMENTS: VOID_ELEMENTS,
 		isBlock: isBlock,
 		isSpan: isSpan,
 		isIgnorableWhitespace: isIgnorableWhitespace,
