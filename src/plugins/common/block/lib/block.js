@@ -199,12 +199,16 @@ define([
 		/**
 		 * This function is initialized in _initPadUnpd.
 		 * Pad inline Block.
+		 *
+		 * @private
 		 */
 		_padInLineBlock: undefined,
 
 		/**
 		 * This function is initialized in _initPadUnpd.
-		 * Unpd inline Block.
+		 * Unpad inline Block.
+		 *
+		 * @private
 		 */
 		_unpadInLineBlock: undefined,
 
