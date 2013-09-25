@@ -186,29 +186,37 @@ define([
 
 			// Creates functions
 
-			this._createPadUnpadFns();
 			// Only for the inline blocks.
 			// It is not possible to insert text after or before a Block span
 			// when after or before the Block there is not elements
 			if (Html.isInlineFormattable(this.$element[0])) {
-				Aloha.bind('aloha-editable-activated', this._padInLineBlock);
-				Aloha.bind('aloha-editable-deactivated', this._unpadInLineBlock);
+				this._initPadUnpad(this);
 			}
 
 			this._initialized = true;
 		},
 
+		/**
+		 * This function is initialized in _initPadUnpd.
+		 * Pad inline Block.
+		 */
 		_padInLineBlock: undefined,
+
+		/**
+		 * This function is initialized in _initPadUnpd.
+		 * Unpd inline Block.
+		 */
 		_unpadInLineBlock: undefined,
 
 		/**
-		 * Crear pad and unpad functions with this block as
-		 * parameter.
+		 * Create pad and unpad functions within this block scope
 		 *
 		 * @private
 		 */
-		_createPadUnpadFns: function () {
-			this._padInLineBlock = (function (thisBlock) {
+		_initPadUnpad: function() {
+			var thisBlock = this;
+
+			this._padInLineBlock = (function () {
 				return function ($event, data) {
 					if (data.editable) {
 						var $block = data.editable.obj.find('#' + thisBlock.id);
@@ -219,7 +227,7 @@ define([
 				}
 			})();
 
-			this._unpadInLineBlock = (function (thisBlock) {
+			this._unpadInLineBlock = (function() {
 				return function ($event, data) {
 					if (data.editable) {
 						var $block = data.editable.obj.find('#' + thisBlock.id);
@@ -229,7 +237,10 @@ define([
 					}
 				}
 			})();
-	},
+
+			Aloha.bind('aloha-editable-activated', this._padInLineBlock);
+			Aloha.bind('aloha-editable-deactivated', this._unpadInLineBlock);
+		},
 
 		/**
 		 * Is set inside the constructor to the event handler function
