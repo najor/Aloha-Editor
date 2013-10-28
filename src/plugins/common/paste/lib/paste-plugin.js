@@ -38,7 +38,9 @@ define([
 	'contenthandler/contenthandler-utils',
 	'aloha/console',
 	'aloha/copypaste',
-	'aloha/contenthandlermanager'
+	'aloha/contenthandlermanager',
+	'util/browser',
+	'util/html'
 ], function (
 	$,
 	Aloha,
@@ -47,7 +49,9 @@ define([
 	ContentHandlerUtils,
 	Console,
 	CopyPaste,
-	ContentHandlerManager
+	ContentHandlerManager,
+    Browser,
+    Html
 ) {
 	'use strict';
 
@@ -65,7 +69,7 @@ define([
 	 * @type {boolean}
 	 * @const
 	 */
-	var IS_IE = !!$.browser.msie;
+	var IS_IE = Browser.ie;
 
 	/**
 	 * Matches as string consisting of a single white space character.
@@ -240,38 +244,77 @@ define([
 	}
 
 	/**
-	 * Delete the first match in a string
+	 * Check if the node has children
 	 *
-	 * @param {String} string String to modify
-	 * @param {String} match Match string must be replaced
-	 * @returns {string} Original string with the first match replaced.
+	 * @param {HTMLElement} node node to inspect
+	 * @returns {boolean} true if the node has children, false otherwise
 	 */
-	function deleteFirstMatch(string, match) {
-		return string.replace(match, '');
+	function hasChildren(node) {
+		return node.childNodes.length > 0;
 	}
 
 	/**
-	 * Delete the first Header tag if exists.
+	 * Clear <br> tags from clipboard only for Mozilla browsers.
+	 * When copying from text editors (Note) the paragraph are represented like
+	 * <br> tags. This behavior is wrong so we must replace them for <p> tags.
 	 *
-	 * @param htmlString
-	 * @returns {XML|string}
+	 * @param $clipboard
+	 * @returns {String} html string
 	 */
-	function deleteFirstHeaderTag(htmlString) {
-		var matchFirstHeaderTag = /^<h\d+.*?>/i.exec(htmlString),
-		    startHeaderTag,
-		    endHeaderTag;
+	function clearBRTagsMozilla($clipboard) {
+		var childNodes = $clipboard[0].childNodes,
+		    len = childNodes.length,
+		    $newContent = $('<div></div>'),
+		    i,
+			newPTagNode = document.createElement('p');
 
-		if (matchFirstHeaderTag === null) {
-			return htmlString;
+		for (i = 0; i < len - 1; i++) {
+			if (childNodes[i].nodeName === 'BR') {
+				if (hasChildren(newPTagNode)) {
+					$newContent.append(newPTagNode);
+					newPTagNode = document.createElement('p');
+				}
+				if (childNodes[i + 1].nodeName === 'BR') {
+					newPTagNode.appendChild(document.createElement('br'));
+					$newContent.append(newPTagNode);
+					newPTagNode = document.createElement('p');
+				}
+			} else if (Html.isBlock(childNodes[i])) {
+				if (hasChildren(newPTagNode)) {
+					$newContent.append(newPTagNode);
+					newPTagNode = document.createElement('p');
+				}
+				$newContent.append(childNodes[i].cloneNode(true));
+			} else {
+				newPTagNode.appendChild(childNodes[i].cloneNode(true));
+			}
 		}
 
-		startHeaderTag = matchFirstHeaderTag[0];
-		endHeaderTag = '</' + startHeaderTag.substr(1);
+		var lastNode = childNodes[len - 1];
+		if (lastNode.nodeName === 'BR' || Html.isBlock(lastNode)) {
+			if (hasChildren(newPTagNode)) {
+				$newContent.append(newPTagNode);
+			}
+			$newContent.append(lastNode.cloneNode(true));
+		} else {
+			newPTagNode.appendChild(lastNode.cloneNode(true));
+			$newContent.append(newPTagNode);
+		}
+		return $newContent.html();
+	}
 
-		return deleteFirstMatch(
-			deleteFirstMatch(htmlString, startHeaderTag),
-			endHeaderTag
-		);
+
+	/**
+	 * Make some clean up into the clipboard.
+	 *
+	 * @param $clipboard
+	 * @returns {String} html string clean
+	 */
+	function cleanUpClipboard($clipboard) {
+		if (Browser.mozilla) {
+			return clearBRTagsMozilla($clipboard);
+		}
+		return $clipboard.html();
 	}
 
 	/**
@@ -293,7 +336,7 @@ define([
 			return;
 		}
 
-		var content = deleteFirstHeaderTag($clipboard.html());
+		var content = cleanUpClipboard($clipboard);
 		var handler = ContentHandlerManager.get('formatless');
 
 		content = handler ? handler.handleContent(content) : content;

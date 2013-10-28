@@ -6500,6 +6500,45 @@ define([
 		}
 	}
 
+
+	/**
+	 * Delete the first match in a string
+	 *
+	 * @param {String} string String to modify
+	 * @param {String} match Match string must be replaced
+	 * @returns {string} Original string with the first match replaced.
+	 */
+	function deleteFirstMatch (string, match) {
+		return string.replace(match, '');
+	}
+
+
+	/**
+	 * Delete the first Header tag if exists.
+	 * When copying headings, the first head tag has to be removed,
+	 * so the firsts character in the insertHtml value adapts to the
+	 * landing tag.
+	 *
+	 * @param htmlString
+	 * @returns {string}
+	 */
+	function deleteFirstHeaderTag(htmlString) {
+		var matchBeginnigHeaderTag = /^<h\d+.*?>/i.exec(htmlString),
+			startHeaderTag,
+			endHeaderTag;
+
+		if (matchBeginnigHeaderTag === null) {
+			return htmlString;
+		}
+
+		startHeaderTag = matchBeginnigHeaderTag[0];
+		endHeaderTag = '</' + startHeaderTag.substr(1);
+
+		return deleteFirstMatch(
+			       deleteFirstMatch(htmlString, startHeaderTag),
+			       endHeaderTag);
+	}
+
 	//@}
 	///// Move the given collapsed range over adjacent zero-width whitespace characters.
 	///// The range is
@@ -7512,6 +7551,8 @@ define([
 			if (!isEditable(range.startContainer) && !isEditingHost(range.startContainer)) {
 				return;
 			}
+
+			value = deleteFirstHeaderTag(value);
 
 			// "Let frag be the result of calling createContextualFragment(value)
 			// on the active range."
