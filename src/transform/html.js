@@ -69,8 +69,8 @@ define([
 	 * @param  {Document} doc
 	 * @return {Element}
 	 */
-	function normalizeCenter(doc, node) {
-		return node;
+	function normalizeCenter(element, doc) {
+		return element;
 	}
 
 	/**

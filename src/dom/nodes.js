@@ -327,6 +327,16 @@ define([
 	}
 
 	/**
+	 * Returns a deep clone of the given node.
+	 *
+	 * @param  {Node} node
+	 * @return {Node}
+	 */
+	function cloneDeep(node) {
+		return node.cloneNode(true);
+	}
+
+	/**
 	 * Returns a shallow clone of the given node.
 	 *
 	 * @param  {Node} node
@@ -373,6 +383,7 @@ define([
 
 		clone        : clone,
 		cloneShallow : cloneShallow,
+		cloneDeep    : cloneDeep,
 
 		fragmentHtml : fragmentHtml
 	};

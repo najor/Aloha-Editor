@@ -112,6 +112,9 @@ define([
 		if (Dom.hasClass(node, 'MsoSubtitle')) {
 			return [rewrap(node, 'h2', doc)];
 		}
+		if (node.nodeName === 'A' && !Dom.getAttr(node, 'href')) {
+			return Dom.children(node);
+		}
 		var nodeName = namespacedNodeName(node);
 		if (nodeName) {
 			return [rewrap(node, nodeName, doc)];

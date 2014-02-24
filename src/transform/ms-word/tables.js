@@ -65,7 +65,7 @@ define(['dom'], function (Dom) {
 			}
 			processed.push(node);
 		}
-		var clone = Dom.clone(element, false);
+		var clone = Dom.cloneShallow(element);
 		Dom.move(processed, clone);
 		return clone;
 	}

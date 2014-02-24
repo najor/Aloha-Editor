@@ -16,7 +16,7 @@
 	 */
 	function trim(node) {
 		if (Dom.isTextNode(node)) {
-			node.data = node.data.trim()
+			node.data = node.data.trim();
 		} else {
 			Dom.children(node).forEach(trim);
 		}
@@ -60,6 +60,7 @@
 			var path = 'transform/ms-word/' + directory + '/';
 			var i;
 			for (i = 1; i <= total; i++) {
+//				for (i = 8; i <= 8; i++) {
 				$.ajax({
 					url: path + (i < 10 ? '0' : '') + i + '.html',
 					async: false,

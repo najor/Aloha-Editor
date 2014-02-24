@@ -498,7 +498,7 @@ define([], function Content() {
 	};
 
 	var ATTRIBUTES_WHITELIST = {
-		'IMG' : ['alt', 'src'],
+		'IMG' : ['alt', 'src', 'height', 'width'],
 		'A'   : ['href', '_target'],
 		'TD'  : ['colspan', 'rowspan'],
 		'TH'  : ['colspan', 'rowspan'],
