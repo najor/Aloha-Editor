@@ -30,6 +30,7 @@ define(['aloha/core'], function (Aloha) {
 		mozilla : Aloha.browser.mozilla,
 		ie8     : Aloha.browser.msie && parseInt(Aloha.browser.version, 10) < 9,
 		ie7     : Aloha.browser.msie && parseInt(Aloha.browser.version, 10) < 8,
-		ie      : Aloha.browser.msie
+		ie      : Aloha.browser.msie,
+		ie9orGreater: Aloha.browser.msie && parseInt(Aloha.browser.version, 10) >= 9
 	};
 });

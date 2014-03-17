@@ -38,7 +38,8 @@ define([
 	'contenthandler/contenthandler-utils',
 	'aloha/console',
 	'aloha/copypaste',
-	'aloha/contenthandlermanager'
+	'aloha/contenthandlermanager',
+	'util/browser'
 ], function (
 	$,
 	Aloha,
@@ -47,7 +48,8 @@ define([
 	ContentHandlerUtils,
 	Console,
 	CopyPaste,
-	ContentHandlerManager
+	ContentHandlerManager,
+    Browser
 ) {
 	'use strict';
 
@@ -275,6 +277,40 @@ define([
 	}
 
 	/**
+	 * Checks if browser and document mode are 9 or above versions.
+	 * @param  {Document} doc
+	 * @return {boolean}
+	 */
+	function isIE9orDocMode9(doc) {
+		return Browser.ie9orGreater && doc.documentMode >= 9;
+	}
+
+	/**
+	 * Fixes pasted content for IE browsers.
+	 * @param   {string} content
+	 * @returns {string}
+	 */
+	function fixIEissues(content, doc) {
+		var fixedContent = content;
+		// Because IE inserts an insidious nbsp into the content during pasting
+		// that needs to be removed.  Leaving it would otherwise result in an
+		// empty paragraph being created right before the pasted content when
+		// the pasted content is a paragraph.
+		if (IS_IE && /^&nbsp;/.test(fixedContent)) {
+			fixedContent = fixedContent.substring(6);
+		}
+
+		// '\n' are replaced by '<br>' and white space by '&nbsp;' in IE9 and above.
+		// We undo these changes.
+//		if (isIE9orDocMode9(doc)) {
+//			fixedContent = fixedContent.replace(/<br.*?>/ig, '\n');
+//			fixedContent = fixedContent.replace(/&nbsp;/ig, ' ');
+//		}
+
+		return fixedContent;
+	}
+
+	/**
 	 * Gets the pasted content and inserts them into the current active
 	 * editable.
 	 *
@@ -298,14 +334,7 @@ define([
 
 		content = handler ? handler.handleContent(content) : content;
 
-		// Because IE inserts an insidious nbsp into the content during pasting
-		// that needs to be removed.  Leaving it would otherwise result in an
-		// empty paragraph being created right before the pasted content when
-		// the pasted content is a paragraph.
-		if (IS_IE && /^&nbsp;/.test(content)) {
-			content = content.substring(6);
-		}
-
+		content = fixIEissues(content, $clipboard[0].ownerDocument);
 		restoreSelection(range);
 		prepRangeForPaste(range);
 
@@ -362,13 +391,16 @@ define([
 	 *
 	 * @param {jQuery.<HTMLElement>} $editable jQuery object containing an
 	 *                                         editable DOM element.
-	 * @param {boolean} hasClipboardAccess Whether clipboard access is possible.
 	 */
-	function prepare($editable, hasClipboardAccess) {
+	function prepare($editable) {
 		// FIXME: Because the alternative method, which relies on clipboard
 		//        access, leads to incorrect cursor positions after pasting.
-		// if (IS_IE && !hasClipboardAccess) {
-		if (IS_IE) {
+		//        clipboardData only available in IE9 and above versions.
+		//        IE9 and above, execCommand('paste') replaces \n by <br>.
+		//        clipboardData.getData returns text content, not HTML content.
+		//        (http://msdn.microsoft.com/en-us/library/ie/ms536436(v=vs.85).aspx)
+		var doc = $editable[0].ownerDocument;
+		if (isIE9orDocMode9(doc)) {
 			$editable.bind('beforepaste', function ($event) {
 				scrollPositionBeforePaste.x = window.scrollX ||
 					document.documentElement.scrollLeft;
@@ -388,7 +420,8 @@ define([
 
 				var range = CopyPaste.getRange();
 				redirect(range, $CLIPBOARD);
-				if (IS_IE) {
+				if (IS_IE && !isIE9orDocMode9(doc)) {
+					$event.preventDefault();
 					var tmpRange = document.selection.createRange();
 					tmpRange.execCommand('paste');
 				}
@@ -404,16 +437,15 @@ define([
 		init: function () {
 			$('body').append($CLIPBOARD);
 
-			var hasClipboardAccess = !this.settings.noclipboardaccess;
-
 			Aloha.bind('aloha-editable-created', function ($event, editable) {
-				prepare(editable.obj, hasClipboardAccess);
+				prepare(editable.obj);
 			});
 
 			// Bind a handler to the paste event of the pasteDiv to get the
 			// pasted content (but do this only once, not for every editable)
 			// if (IS_IE && !hasClipboardAccess) {
-			if (IS_IE) {
+			var doc = $CLIPBOARD[0].ownerDocument;
+			if (isIE9orDocMode9(doc)) {
 				$CLIPBOARD.bind('paste', function ($event) {
 					onPaste($event, ieRangeBeforePaste, function () {
 						ieRangeBeforePaste = null;
