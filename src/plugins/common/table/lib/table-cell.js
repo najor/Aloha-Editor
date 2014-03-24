@@ -381,6 +381,8 @@ define([
 
 		var rect = this._getSelectedRect();
 
+		Aloha.getSelection().removeAllRanges();
+
 		var table = this.tableObj;
 		var $rows = table.obj.children().children('tr');
 		var grid = Utils.makeGrid($rows);
