@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Aloha Test Seite</title>
+
+	<!-- styles -->
+	<link rel="stylesheet" href="aloha/css/aloha.css" type="text/css">
+
+	<!-- javascripts -->
+	<script src="aloha/lib/require.js">
+	</script>
+
+	<script src="aloha/lib/aloha.js"
+	        data-aloha-plugins="common/ui,
+                				common/format">
+	</script>
+
+	<!-- Aloha configuration -->
+	<script>
+		Aloha.settings.plugins = {
+			format: {
+				config: [ 'code', 'u', 'strong', 'del', 'em', 'b', 'i', 's', 'sub', 'sup', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre', 'removeFormat' ]
+			}
+		};
+
+		Aloha.settings.toolbar = {
+			tabs: [{
+				label: 'Custom Format',
+				components: [
+					['bold', 'strong', 'emphasis', 'italic', 'subscript', 'superscript', 'strikethrough']
+				]
+			}],
+			exclude: ['tab.format.label', 'tab.insert.label']
+		};
+
+		Aloha.ready(function() {
+			$('#alohaEditor').aloha();
+		});
+
+	</script>
+</head>
+<body id="bodyId">
+
+<div id="alohaEditor">
+	CLICK ME¡¡ I am an editable.
+</div>
+
+</body>
+</html>
