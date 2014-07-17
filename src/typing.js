@@ -100,6 +100,52 @@ define([
 		return event.range;
 	}
 
+	/**
+	 * Checks for sequence of whitespace and alternate whitespaces with
+	 * non-breaking-spaces
+	 *
+	 * @param {Boundary} boundary
+	 * @returns {string}
+	 */
+	function sequenceWhiteSpaces(boundary) {
+		var node = Boundaries.container(boundary);
+		var offset = Boundaries.offset(boundary);
+		var text;
+
+		if (!Dom.isTextNode(node) && (node.textContent.trim().length === 0
+			&& node.textContent.indexOf('\xa0'))) {
+			text = '\xa0';
+		} else {
+			if (!Dom.isTextNode(node)) {
+				node = node.childNodes[offset - 1];
+				offset = node.length - 1;
+			}
+
+			if (node.textContent[offset - 1] === ' ' || node.textContent[offset] === ' ') {
+				text = '\xa0';
+			}
+
+			if (node.length <= 2) {
+				if (node.textContent.trim().length === 0) {
+					text = '\xa0';
+				}
+			} else {
+				if (node.substringData(offset - 2, 2) === '\xa0\xa0') {
+					node.replaceData(offset - 2, 2, '\xa0 ');
+					text = '\xa0';
+				}
+
+				if (node.textContent.substr(offset + 1).trim() === '') {
+					text = '\xa0';
+					if (node.substringData(offset - 1, 1) === '\xa0') {
+						node.replaceData(offset - 1, 1, '');
+					}
+				}
+			}
+		}
+		return text;
+	}
+
 	function insertText(event) {
 		var editable = event.editable;
 		var range = event.range;
@@ -117,7 +163,7 @@ define([
 			);
 			var whiteSpaceStyle = Dom.getComputedStyle(elem, 'white-space');
 			if (!Html.isWhiteSpacePreserveStyle(whiteSpaceStyle)) {
-				text = '\xa0';
+				text = sequenceWhiteSpaces(boundary);
 			}
 		}
 
