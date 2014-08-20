@@ -1918,7 +1918,7 @@
 		/*----------------------------------------------------------------------------------------------------------------*/
 
 		/*
-    This is a workaround for a bug where IE returns the wrong container element from the TextRange's parentElement()
+    This is a workaround for a bug where IE < 11 (from 11 onward parentElement does not exists) returns the wrong container element from the TextRange's parentElement()
     method. For example, in the following (where pipes denote the selection boundaries):
 
     <ul id="ul"><li id="a">| a </li><li id="b"> b |</li></ul>
@@ -1932,6 +1932,12 @@
     - the parentElement() of the textRange after calling collapse(false)
      */
 		function getTextRangeContainerElement(textRange) {
+			// Workaround for IE11 where parentElement it's not implemented.
+			// (http://help.dottoro.com/ljcfdmjx.php)
+			if (textRange.commonAncestorContainer) {
+				return textRange.commonAncestorContainer;
+			}
+
 			var parentEl = textRange.parentElement();
 
 			var range = textRange.duplicate();
